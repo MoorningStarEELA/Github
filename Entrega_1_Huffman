@@ -1,0 +1,94 @@
+import os
+from tkinter import *
+from tkinter import ttk
+import tkinter as tk
+from tkinter import filedialog
+
+archivo_abierto = ""
+
+def abrirarchivo():
+    global archivo_abierto
+    archivo_abierto = filedialog.askopenfilename()
+    print("Ruta del archivo seleccionado:", archivo_abierto)
+    if archivo_abierto:
+        mensaje.config(text="Archivo abierto: " + archivo_abierto)
+        boton_frecuencia.config(state="normal")
+        mostrar_contenido(archivo_abierto)
+
+def mostrar_contenido(ruta_archivo):
+    with open(ruta_archivo, "r") as f:
+        contenido = f.read()
+
+    ventana_contenido = tk.Toplevel()
+    ventana_contenido.title("Contenido del Archivo")
+
+    texto = Text(ventana_contenido)
+    texto.insert(END, contenido)
+    texto.pack()
+
+def calcular_frecuencia():
+    if archivo_abierto:
+        try:
+            frecuencias = caracteres(archivo_abierto)
+            if frecuencias:
+                ventana_frecuencia(frecuencias)
+        except Exception as e:
+            print("Error al calcular frecuencia:", e)
+
+def ventana_frecuencia(frecuencias):
+    ventana = Toplevel()
+    ventana.title("Frecuencia de Caracteres")
+
+    ttk.Label(ventana, text="Caracteres ordenados por frecuencia:").pack()
+
+    for caracter, frecuencia in frecuencias.items():
+        ttk.Label(ventana, text=f"'{caracter}': {frecuencia}").pack()
+
+def caracteres(ruta_archivo):
+    ruta_completa = os.path.abspath(ruta_archivo)
+    frecuencia_caracteres = {}
+
+    if not os.path.exists(ruta_completa):
+        print(f"No se encontró el archivo: {ruta_completa}")
+        return None
+
+    try:
+        with open(ruta_archivo, 'r', encoding='utf-8') as archivo:
+            texto = archivo.read()
+    except Exception as e:
+        print(f"Error al leer el archivo: {e}")
+        return None
+
+    for caracter in texto:
+        if caracter in frecuencia_caracteres:
+            frecuencia_caracteres[caracter] += 1
+        else:
+            frecuencia_caracteres[caracter] = 1
+
+    frecuencia_ordenada = dict(sorted(frecuencia_caracteres.items(), key=lambda item: item[1], reverse=True))
+
+    return frecuencia_ordenada
+
+ventana = tk.Tk()
+ventana.title("Operaciones con Archivos")
+
+mensaje = tk.Label(ventana, text="")
+mensaje.pack(pady=10)
+
+boton_abrir = tk.Button(ventana, text="Abrir Archivo", command=abrirarchivo)
+boton_abrir.pack(pady=5)
+
+boton_frecuencia = tk.Button(ventana, text="Calcular Frecuencia", command=calcular_frecuencia, state="disabled")
+boton_frecuencia.pack(pady=5)
+
+# Botones adicionales
+boton_examinar = tk.Button(ventana, text="Examinar", command=abrirarchivo)
+boton_examinar.pack(pady=5)
+
+boton_comprimir = tk.Button(ventana, text="Comprimir", command="comprimir", state="disabled")
+boton_comprimir.pack(pady=5)
+
+boton_descomprimir = tk.Button(ventana, text="Descomprimir", command="descomprimir", state="disabled")
+boton_descomprimir.pack(pady=5)
+
+ventana.mainloop()
