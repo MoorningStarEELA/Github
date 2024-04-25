@@ -1,0 +1,132 @@
+import tkinter as tk
+from tkinter import filedialog
+
+def inicio(ventana):
+    
+    ventana.title("Codificación Huffman")
+
+    Ancho = ventana.winfo_screenwidth()
+    Largo = ventana.winfo_screenheight()
+   
+    anchoPorcentaje = 60
+    largoPorcentaje = 40
+    colorFondo = '#19191a'
+
+    anchoVentana = int(Ancho * anchoPorcentaje / 100)
+    largoVentana = int(Largo * largoPorcentaje / 100)
+
+    ventana.geometry(str(anchoVentana) + "x" + str(largoVentana))
+    ventana.configure(bg=colorFondo)
+
+    textoFrame = tk.Frame(ventana, width=proporcionAncho(100, ventana, anchoVentana), height=proporcionLargo(90, ventana, largoVentana), background="red")
+    textoFrame.grid(row=0, column=0, sticky="nswe", padx=20, pady=10)
+    textoFrame.grid_propagate(False) 
+
+    scrollbarx = tk.Scrollbar(textoFrame, orient=tk.HORIZONTAL)
+    scrollbarx.pack(side=tk.BOTTOM, fill=tk.X)
+    scrollbary = tk.Scrollbar(textoFrame, orient=tk.VERTICAL)
+    scrollbary.pack(side=tk.RIGHT, fill=tk.Y)
+
+    contenidoPalabras = tk.Text(textoFrame, wrap="none", state="normal", padx=10, pady=10, xscrollcommand=scrollbarx.set, yscrollcommand=scrollbary.set)
+    contenidoPalabras.pack(expand=True, fill=tk.BOTH)
+    contenidoPalabras.insert(tk.END, "Texto Documento: ")
+    contenidoPalabras.config(width=proporcionAncho(11.6, ventana, anchoVentana), height=proporcionLargo(3, ventana, largoVentana))
+
+    resultadoFrame = tk.Frame(ventana, width=proporcionAncho(100, ventana, anchoVentana), height=proporcionLargo(90, ventana, largoVentana), background="blue")
+    resultadoFrame.grid(row=0, column=1, sticky="nswe", padx=20, pady=10)
+    resultadoFrame.grid_propagate(False)
+
+    scrollbarx_res = tk.Scrollbar(resultadoFrame, orient=tk.HORIZONTAL)
+    scrollbarx_res.pack(side=tk.BOTTOM, fill=tk.X)
+    scrollbary_res = tk.Scrollbar(resultadoFrame, orient=tk.VERTICAL)
+    scrollbary_res.pack(side=tk.RIGHT, fill=tk.Y)
+
+    resultadoTexto = tk.Text(resultadoFrame, wrap="none", state="normal", padx=10, pady=10, xscrollcommand=scrollbarx_res.set, yscrollcommand=scrollbary_res.set)
+    resultadoTexto.pack(expand=True, fill=tk.BOTH)
+    resultadoTexto.config(width=proporcionAncho(11.6, ventana, anchoVentana), height=proporcionLargo(3, ventana, largoVentana))
+
+    botonesFrame = tk.Frame(ventana, width=proporcionAncho(100, ventana, anchoVentana), height=proporcionLargo(20, ventana, largoVentana), background='#19191a', pady=45)
+    botonesFrame.grid(row=1, column=0, columnspan=2)
+
+    boton = crearBoton(botonesFrame, "Examinar", lambda : examinarArchivo(contenidoPalabras, resultadoTexto))
+    boton.grid(row=0, column=0)
+
+    boton2 = crearBoton(botonesFrame, "Contar Caracteres", lambda: contarFrecuencia(contenidoPalabras, resultadoTexto))
+    boton2.grid(row=0, column=1, padx=20)
+    
+    boton3 = crearBoton(botonesFrame, "Comprimir", None)
+    boton3.grid(row=0, column=2)
+
+    boton4 = crearBoton(botonesFrame, "Descomprimir", None)
+    boton4.grid(row=0, column=3)
+
+    ventana.mainloop()
+
+def proporcionAncho(X, Ventana, Ancho=None):
+
+    if Ancho is None:
+        Ancho = Ventana.winfo_screenwidth()
+        return int((Ancho * X) / 100)
+
+    return int((Ancho * X) / 100)
+
+def proporcionLargo(X, Ventana, Largo=None):
+
+    if Largo is None:
+        Largo = Ventana.winfo_screenheight()
+        return int((Largo * X) / 100)
+
+    return int((Largo * X) / 100)
+
+def crearBoton(ventana, texto, comando=None):
+
+    boton = tk.Button(
+        ventana,
+        text=texto,
+        background="#373739",
+        foreground="white", 
+        font=("Helvetica", 12, "bold"),
+        width=proporcionAncho(1.5, ventana), 
+        height=proporcionLargo(0.3, ventana), 
+        borderwidth=1,
+        cursor="hand2",
+        relief=tk.RAISED,
+        command=comando 
+    )
+
+    return boton
+
+def examinarArchivo(texto, resultado):
+    rutaArchivo = filedialog.askopenfilename()
+    
+    if rutaArchivo: 
+          
+        with open(rutaArchivo, 'r') as archivo:
+            contenido = archivo.read()
+            texto.delete("1.0", tk.END)  
+            texto.insert(tk.END, contenido)
+
+            print("Ruta del archivo seleccionado:", rutaArchivo)
+
+    else:
+        print("No se seleccionó ningún archivo.")
+
+def contarFrecuencia(texto, resultado):
+    contenido = texto.get("1.0", tk.END)
+    frecuencia = {}
+
+    for char in contenido:
+        if char in frecuencia:
+            frecuencia[char] += 1
+        else:
+            frecuencia[char] = 1
+
+    resultado.config(state=tk.NORMAL)
+    resultado.delete("1.0", tk.END)
+    resultado.insert(tk.END, "Lista:\n")    
+    for char, count in frecuencia.items():
+        resultado.insert(tk.END, f"Carácter: '{char}' {count}\n")
+    resultado.config(state=tk.DISABLED)
+
+ventana = tk.Tk()
+inicio(ventana)
